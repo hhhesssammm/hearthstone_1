@@ -4,61 +4,64 @@ package player;
  @see massage
  */
 import massage.Warning;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Scanner;
 
 public class SignIn {
+    private static final Logger logger = (Logger) LogManager.getLogger(SignIn.class);
     /**@param for warning massage*/
     Warning warning=new Warning();
-    /**open source profiles*/
-    private String dirname = "c:/sign up";
+    /**source profiles dic*/
+    private String dirname = "sign up";
     /**checking info that we are going to open profile*/
-    public void inputInfo(String userNameIn,String userPassIn) throws IOException {
+    public boolean inputInfo(String userNameIn,String userPassIn) throws IOException {
         /**opening source file of pass and username*/
         String userName=new String();
         String userPass=new String();
-
-        /**https://www.tutorialspoint.com/ this is source*/
-        File dir = new File(dirname);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept (File dir, String letter) {
-                return letter.equals(userNameIn);
-            }
-        };
-        String[] children = dir.list(filter);
-        if (children == null) {
-        } else {
-            File file = new File(dirname+"/"+children[0]);
-            Scanner sc = new Scanner(file);
-            for (int i=0;sc.hasNextLine();i++) {
-                /**i=0 is for username
-                 * i=1 is for password
-                 * i=2  is for coin
-                 */
-                if(i==0) {
-                    String string = sc.nextLine();
-                    userName=string.substring(string.indexOf(" = "));
+        File file = new File(dirname+"/"+userNameIn);
+            if(file.exists()==false){
+                logger.error("there is not such a file:"+file.getName());
+            }else {
+                BufferedReader br = null;
+                try {
+                    br = new BufferedReader(new FileReader(file));
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                if(i==1) {
-                    String string = sc.nextLine();
-                    userPass = string.substring(string.indexOf(" = "));
+                String st;
+                try {
+                    for (int i = 0; (st = br.readLine()) != null; i++) {
+                        /**i=0 is for username
+                         * i=1 is for password
+                         * i=2 is for coin
+                         */
+                        if (i == 0) {
+                            String string = st;
+                            userName = string.substring(string.indexOf(" = ") + 3);
+                        }
+                        if (i == 1) {
+                            String string = st;
+                            userPass = string.substring(string.indexOf(" = ") + 3);
+                        }
+                    }
+                    br.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-        }
         /**checking user and pass and show warning and continue
          * @param userName is real username and we want to check with userNameIn
          * @param userPass is real password and we want to check with userPassIn
          */
-        while (true) {
-            if (userName.equals(userNameIn) && userPass.equals(userPassIn)) {
-                break;
-            } else {
-                warning.setMassageWrong("Your username or password is wrong try harder:)");
-                warning.getMassageWrong();
-            }
+        if (userName.equals(userNameIn) && userPass.equals(userPassIn)) {
+            return true;
+        } else {
+            warning.setMassageWrong("Your username or password is wrong try harder:)");
+            warning.getMassageWrong();
         }
+        return false;
     }
 }

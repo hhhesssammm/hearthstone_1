@@ -2,13 +2,14 @@ package player;
 
 
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.*;
 import java.util.Scanner;
 
 public class Profile {
-
+    private static final Logger logger = (Logger) LogManager.getLogger(Profile.class);
     /**
      * @param coin is saved coin
      * @param dirname is file location
@@ -16,43 +17,56 @@ public class Profile {
     private String userName;
     private String userPass;
     private String coin;
-    private String dirname = "c:/sign up";
+    private String dirname = "sign up";
     /**for set a profile*/
-    public void setProfile(final String name) throws IOException {
-        /**https://www.tutorialspoint.com/ this is source*/
-        File dir = new File(dirname);
-        FilenameFilter filter = new FilenameFilter() {
-            public boolean accept (File dir, String letter) {
-                return letter.equals(name);
+    /**helping by https://www.geeksforgeeks.org/different-ways-reading-text-file-java*/
+    public void setProfile(final String name){
+        File file = new File(dirname+"/"+name);
+        if(file.exists()==false){
+            logger.error("there is not such a file:"+file.getName());
+        }else {
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(new FileReader(file));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        };
-        String[] children = dir.list(filter);
-        if (children == null) {
-            System.out.println("Either dir does not exist or is not a directory");
-        } else {
-            File file = new File(dirname+"/"+children[0]);
-            Scanner sc = new Scanner(file);
-            for (int i=0;sc.hasNextLine();i++) {
-                /**i=0 is for username
-                 * i=1 is for password
-                 * i=2  is for coin
-                 */
-                if(i==0) {
-                    String string = sc.nextLine();
-                    this.userName=string.substring(string.indexOf(" = ")+3);
+            String st;
+            try {
+                for (int i = 0; (st = br.readLine()) != null; i++) {
+                    /**i=0 is for username
+                     * i=1 is for password
+                     * i=2 is for coin
+                     */
+                    if (i == 0) {
+                        String string = st;
+                        this.userName = string.substring(string.indexOf(" = ") + 3);
+                    }
+                    if (i == 1) {
+                        String string = st;
+                        this.userPass = string.substring(string.indexOf(" = ") + 3);
+                    }
+                    if (i == 2) {
+                        String string = st;
+                        this.coin = string.substring(string.indexOf(" = ") + 3);
+                    }
                 }
-                if(i==1){
-                    String string = sc.nextLine();
-                    this.userPass=string.substring(string.indexOf(" = ")+3);
-                }
-                if(i==2){
-                    String string = sc.nextLine();
-                    this.coin=string.substring(string.indexOf(" = ")+3);
-                }
+                br.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
+    public void deleteProfile(String userName){
+        /** @param file is our goal to delete*/
+        File file=new File(dirname+"/"+userName);
+        if(file.delete()){
+            logger.info("Deleted the file: " + file.getName());
+        }else{
+            logger.info("Failed to delete the file : " + file.getName());
+        }
+    }
     public String getName() {
         return this.userName;
     }

@@ -8,10 +8,10 @@
 `git remote add origin https://github.com/hhhesssammm/hearthstone_1.git`
 <br>
 for change just do it<br>
-    `1.git add .`
+ `  1.git add .`
     <br>
-    `2.git commit -m "something"`
+ `   2.git commit -m "something"`
     <br>
-    `2.git push orirgin master`
+ `   2.git push orirgin master`
 <br>
         
